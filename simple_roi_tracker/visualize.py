@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 import time
 
 from kalman_filter import KalmanFilter
@@ -9,7 +9,7 @@ from edge_aware_kalman_filter import EdgeAwareKalmanFilter
 class InteractiveVisualizer:
     def __init__(self, img_size: Tuple[int, int] = (800, 1200), default_roi_size: Tuple[int, int] = (200, 300), margin_size: int = 150, margin_color: Tuple[int, int, int] = (55, 55, 55)):
         self.img_size = img_size
-        self.default_roi_size = default_roi_size
+        self.default_roi_size: List[int, int] = list(default_roi_size)
         self.original_roi_size = default_roi_size
         self.margin_size = margin_size
         self.margin_color = margin_color
@@ -77,18 +77,18 @@ class InteractiveVisualizer:
             return
 
         if key == ord('w') and self.current_roi:
-            self.default_roi_size[0] += 5
+            self.default_roi_size[1] += 10
         elif key == ord('s') and self.current_roi:
-            self.default_roi_size[0] = max(5, self.default_roi_size[0] - 5)
+            self.default_roi_size[1] = max(10, self.default_roi_size[1] - 10)
         elif key == ord('a') and self.current_roi:
-            self.default_roi_size[1] = max(5, self.default_roi_size[1] - 5)
+            self.default_roi_size[0] = max(10, self.default_roi_size[0] - 10)
         elif key == ord('d') and self.current_roi:
-            self.default_roi_size[1] += 5
+            self.default_roi_size[0] += 10
         elif key == ord('r') and self.current_roi:
-            self.default_roi_size = self.original_roi_size.copy()
+            self.default_roi_size = list(self.original_roi_size.copy())
 
-        self.current_roi[2] = self.default_roi_size[0]
-        self.current_roi[3] = self.default_roi_size[1]
+        self.current_roi[2] = self.default_roi_size[0] # height
+        self.current_roi[3] = self.default_roi_size[1] # width
 
     def run(self):
         while True:
