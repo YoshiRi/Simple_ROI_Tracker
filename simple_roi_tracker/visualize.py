@@ -5,6 +5,7 @@ import time
 
 from kalman_filter import KalmanFilter
 from edge_aware_kalman_filter import EdgeAwareKalmanFilter
+from kalman_filter_with_points_state import KalmanFilterWithPointsState
 
 class InteractiveVisualizer:
     def __init__(self, img_size: Tuple[int, int] = (800, 1200), default_roi_size: Tuple[int, int] = (200, 300), margin_size: int = 150, margin_color: Tuple[int, int, int] = (55, 55, 55)):

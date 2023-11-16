@@ -1,3 +1,13 @@
+"""edge aware kalman filter
+
+Objective:
+- Normal kalman filter do not think about occulusion by the edge of the image
+- This kalman filter tries to change update method by the condition of the corners of the roi
+
+Current status:
+- Not working well
+"""
+
 import numpy as np
 from typing import Tuple, Optional
 

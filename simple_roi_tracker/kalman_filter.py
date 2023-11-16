@@ -1,3 +1,13 @@
+"""Kalman filter
+
+Objective:
+- Normal kalman filter with center of the roi and shape as the state
+- Assume constant velocity model
+
+Current status:
+- Worked but not good at full occlusion by mouse left click
+"""
+
 import numpy as np
 from typing import Tuple, Optional
 
@@ -57,6 +67,9 @@ class KalmanFilter:
         # 誤差共分散の更新
         self.error_cov = self.error_cov - K @ self.measurement_matrix @ self.error_cov
 
+    def to_output_state(self)->Tuple[int, int, int, int]:
+        return tuple(self.state.astype(int)[0:4, 0])
+    
     def predict_and_update(self, dt: float, measurement: Optional[Tuple[float, float, float, float]]):
         self.transition_matrix = np.eye(8)
         self.transition_matrix[0, 4] = dt
@@ -68,5 +81,6 @@ class KalmanFilter:
         if measurement:
             self.update(measurement)
 
-        output_state: Tuple[int, int, int, int] = tuple(self.state.astype(int)[0:4, 0])
-        return output_state
+        
+        return self.to_output_state()
+    
