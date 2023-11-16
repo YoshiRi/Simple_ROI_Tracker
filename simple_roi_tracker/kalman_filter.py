@@ -1,8 +1,8 @@
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Optional
 
 class KalmanFilter:
-    def __init__(self, dt:float = 0.1, process_noise_std: float = 0.5, measurement_noise_std: float = 1.0):
+    def __init__(self, dt:float = 0.1, process_noise_std: Tuple[float, float] = [0.5, 1.5], measurement_noise_std: float = 1.0):
         # 状態量 (x, y, width, height, dx, dy, dwidth, dheight)
         self.state = np.zeros(8).reshape(-1, 1)
 
@@ -21,7 +21,9 @@ class KalmanFilter:
         self.measurement_matrix[0:4, 0:4] = np.eye(4)
 
         # プロセスノイズの共分散
-        self.process_noise_cov = np.eye(8) * process_noise_std**2
+        self.process_noise_cov = np.eye(8) 
+        self.process_noise_cov[0:4, 0:4] *= process_noise_std[0]**2
+        self.process_noise_cov[4:8, 4:8] *= process_noise_std[1]**2
 
         # 観測ノイズの共分散
         self.measurement_noise_cov = np.eye(4) * measurement_noise_std**2
@@ -55,7 +57,7 @@ class KalmanFilter:
         # 誤差共分散の更新
         self.error_cov = self.error_cov - K @ self.measurement_matrix @ self.error_cov
 
-    def predict_and_update(self, dt: float, measurement: Tuple[float, float, float, float]):
+    def predict_and_update(self, dt: float, measurement: Optional[Tuple[float, float, float, float]]):
         self.transition_matrix = np.eye(8)
         self.transition_matrix[0, 4] = dt
         self.transition_matrix[1, 5] = dt
@@ -63,7 +65,8 @@ class KalmanFilter:
         self.transition_matrix[3, 7] = dt
 
         self.predict()
-        self.update(measurement)
+        if measurement:
+            self.update(measurement)
 
         output_state: Tuple[int, int, int, int] = tuple(self.state.astype(int)[0:4, 0])
         return output_state
