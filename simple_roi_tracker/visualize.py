@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 from typing import Tuple
+import time
+
+from kalman_filter import KalmanFilter
 
 class InteractiveVisualizer:
     def __init__(self, img_size: Tuple[int, int] = (800, 1200), default_roi_size: Tuple[int, int] = (200, 300), margin_size: int = 150, margin_color: Tuple[int, int, int] = (55, 55, 55)):
@@ -10,12 +13,17 @@ class InteractiveVisualizer:
         self.margin_color = margin_color
         self.rois = []
         self.current_roi = None
+        self.KF = KalmanFilter()
         cv2.namedWindow("Interactive Visualization")
         cv2.setMouseCallback("Interactive Visualization", self.mouse_event)
+
+        self.current_time = time.time()
+        self.last_time = self.current_time
 
     def mouse_event(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.current_roi = [x, y, self.default_roi_size[0], self.default_roi_size[1]]
+            self.KF.init_state(self.current_roi)
         elif event == cv2.EVENT_MOUSEMOVE and self.current_roi:
             self.current_roi[0], self.current_roi[1] = x, y
 
@@ -50,6 +58,9 @@ class InteractiveVisualizer:
 
     def run(self):
         while True:
+            self.current_time = time.time()
+            dt = self.current_time - self.last_time
+            # draw frame
             frame = np.zeros((self.img_size[0], self.img_size[1], 3), dtype=np.uint8)
             self.add_margin(frame)
             if self.current_roi:    
@@ -57,6 +68,8 @@ class InteractiveVisualizer:
                 measurement_roi = self.get_measurement_roi()
                 if measurement_roi:
                     self.draw_roi(frame, measurement_roi, color=(0, 0, 255))
+                    kf_roi = self.KF.predict_and_update(dt, measurement_roi)
+                    self.draw_roi(frame, kf_roi, color=(255, 0, 0))
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
@@ -69,6 +82,7 @@ class InteractiveVisualizer:
                 self.current_roi[3] = max(5, self.current_roi[3] - 5)
 
             cv2.imshow("Interactive Visualization", frame)
+            self.last_time = self.current_time
 
         cv2.destroyAllWindows()
 
