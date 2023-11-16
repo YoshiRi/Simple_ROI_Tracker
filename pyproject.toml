@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "simple-roi-tracker"
+version = "0.1.0"
+description = ""
+authors = ["yoshiri <yoshiyoshidetteiu@gmail.com>"]
+readme = "README.md"
+packages = [{include = "simple_roi_tracker"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+opencv-python = "^4.8.1.78"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
